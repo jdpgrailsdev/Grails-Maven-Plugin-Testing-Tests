@@ -10,12 +10,32 @@ import spock.lang.*
  */
 class FunctionalSpec extends BaseSpec {
 
-    def "test create-pom"() {
+	def setup() {
+		//Clear the artifact list from the previous execution
+		artifacts?.clear()
+	}
+	
+	def cleanup() {
+//		TODO Should we do this automatically?  This may
+//		TODO mask issues in the Maven plugin if we clean after
+//		TODO execution.  Might make more sense to NOT clean		
+//		TODO so that we can see if any errors occur.						
+//		/*
+//		 * Clean the current working directory, in case it is
+//		 * needed in the next test. Plus, it's always good
+//		 * to clean up after yourself ;).
+//		 */		
+//		executeMvn('clean', "-DgrailsVersion=${grailsVersion}") 
+		workingDir = ''
+	}
+
+    def "test create-pom"() {    	
         when:
-        executeMvn('functional/create-pom', "org.grails:grails-maven-plugin:${grailsVersion}:create-pom", '-DgroupId=com.mycompany') 
+		workingDir = 'functional/create-pom'
+        artifacts << "${workingDir}/pom.xml"
+        executeMvn("org.grails:grails-maven-plugin:${grailsVersion}:create-pom", '-DgroupId=com.mycompany') 
         then:
         getOutput() isSuccessfulTestRun()
-        verifyArtifactExists('functional/create-pom/pom.xml') 
     }
     
     //def "test create-pom without group id"() {
@@ -27,61 +47,83 @@ class FunctionalSpec extends BaseSpec {
     
     def "test create-controller"() {
         when:
-        executeMvn('functional/test-application', 'grails:create-controller', "-DgrailsVersion=${grailsVersion}") 
+		workingDir = 'functional/test-application'
+        artifacts << "${workingDir}/grails-app/controllers/com/mycompany/ControllerTestController.groovy"
+        artifacts << "${workingDir}/test/unit/com/mycompany/ControllerTestControllerTests.groovy"
+        executeMvn('grails:create-controller', "-DgrailsVersion=${grailsVersion}") 
         then:
         getOutput() isSuccessfulTestRun() 
-        verifyArtifactExists('functional/test-application/grails-app/controllers/com/mycompany/ControllerTestController.groovy')
-        verifyArtifactExists('functional/test-application/test/unit/com/mycompany/ControllerTestControllerTests.groovy')
     }
     
     def "test create-domain-class"() {
         when:
-        executeMvn('functional/test-application', 'grails:create-domain-class', "-DgrailsVersion=${grailsVersion}") 
+		workingDir = 'functional/test-application'
+        artifacts << "${workingDir}/grails-app/domain/com/mycompany/DomainTest.groovy"
+        artifacts << "${workingDir}/test/unit/com/mycompany/DomainTestTests.groovy"
+        executeMvn('grails:create-domain-class', "-DgrailsVersion=${grailsVersion}") 
         then:
         getOutput() isSuccessfulTestRun()
-        verifyArtifactExists('functional/test-application/grails-app/domain/com/mycompany/DomainTest.groovy')
-        verifyArtifactExists('functional/test-application/test/unit/com/mycompany/DomainTestTests.groovy')
     }
     
     def "test create-integration-test"() {
         when:
-        executeMvn('functional/test-application', 'grails:create-integration-test', "-DgrailsVersion=${grailsVersion}") 
+		workingDir = 'functional/test-application'
+        artifacts << "${workingDir}/test/integration/com/mycompany/IntegrationTestTests.groovy"
+        executeMvn('grails:create-integration-test', "-DgrailsVersion=${grailsVersion}") 
         then:
         getOutput() isSuccessfulTestRun()    
-        verifyArtifactExists('functional/test-application/test/integration/com/mycompany/IntegrationTestTests.groovy')
     }
     
     def "test create-script"() {
         when:
-        executeMvn('functional/test-application', 'grails:create-script', "-DgrailsVersion=${grailsVersion}") 
+		workingDir = 'functional/test-application'
+        artifacts << "${workingDir}/scripts/TestScript.groovy"
+        executeMvn('grails:create-script', "-DgrailsVersion=${grailsVersion}") 
         then:
-        getOutput() isSuccessfulTestRun()    
-        verifyArtifactExists('functional/test-application/scripts/TestScript.groovy')    
+        getOutput() isSuccessfulTestRun()     
     }
     
     def "test create-service"() {
         when:
-        executeMvn('functional/test-application', 'grails:create-service', "-DgrailsVersion=${grailsVersion}") 
+		workingDir = 'functional/test-application'
+        artifacts << "${workingDir}/grails-app/services/com/mycompany/ServiceTestService.groovy"
+        artifacts << "${workingDir}/test/unit/com/mycompany/ServiceTestServiceTests.groovy"
+        executeMvn('grails:create-service', "-DgrailsVersion=${grailsVersion}") 
         then:
-        getOutput() isSuccessfulTestRun()
-        verifyArtifactExists('functional/test-application/grails-app/services/com/mycompany/ServiceTestService.groovy')
-        verifyArtifactExists('functional/test-application/test/unit/com/mycompany/ServiceTestServiceTests.groovy')    
+        getOutput() isSuccessfulTestRun()  
     }
     
     def "test create-tag-lib"() {
         when:
-        executeMvn('functional/test-application', 'grails:create-tag-lib', "-DgrailsVersion=${grailsVersion}") 
+		workingDir = 'functional/test-application'
+        artifacts << "${workingDir}/grails-app/taglib/com/mycompany/TagLibTestTagLib.groovy"
+        artifacts << "${workingDir}/test/unit/com/mycompany/TagLibTestTagLibTests.groovy"
+        executeMvn('grails:create-tag-lib', "-DgrailsVersion=${grailsVersion}") 
         then:
-        getOutput() isSuccessfulTestRun()
-        verifyArtifactExists('functional/test-application/grails-app/taglib/com/mycompany/TagLibTestTagLib.groovy')
-        verifyArtifactExists('functional/test-application/test/unit/com/mycompany/TagLibTestTagLibTests.groovy')     
+        getOutput() isSuccessfulTestRun()    
     }
     
     def "test create-unit-test"() {
         when:
-        executeMvn('functional/test-application', 'grails:create-unit-test', "-DgrailsVersion=${grailsVersion}") 
+		workingDir = 'functional/test-application'
+        artifacts << "${workingDir}/test/unit/com/mycompany/UnitTestTestTests.groovy"
+        executeMvn('grails:create-unit-test', "-DgrailsVersion=${grailsVersion}") 
         then:
-        getOutput() isSuccessfulTestRun()
-        verifyArtifactExists('functional/test-application/test/unit/com/mycompany/UnitTestTestTests.groovy')     
+        getOutput() isSuccessfulTestRun()    
+    }
+    
+    def "test generate-all"() {
+        when:
+		workingDir = 'functional/test-application'
+        modifyPom("${workingDir}/pom.xml", '<domainClassName>com.mycompany.DomainTest</domainClassName>', '<domainClassName>com.mycompany.DomainTestGenAll</domainClassName>')
+        artifacts << "${workingDir}/grails-app/domain/com/mycompany/DomainTestGenAll.groovy"
+        artifacts << "${workingDir}/grails-app/controllers/com/mycompany/DomainTestGenAllController.groovy"
+        artifacts << "${workingDir}/grails-app/views/domainTestGenAll/create.gsp"
+        artifacts << "${workingDir}/test/unit/com/mycompany/DomainTestGenAllTests.groovy"
+        artifacts << "${workingDir}/test/unit/com/mycompany/DomainTestGenAllControllerTests.groovy"
+		executeMvn('grails:create-domain-class', "-DgrailsVersion=${grailsVersion}")
+        executeMvn('grails:generate-all', "-DgrailsVersion=${grailsVersion}") 
+        then:
+        getOutput() isSuccessfulTestRun()     
     }
 }
