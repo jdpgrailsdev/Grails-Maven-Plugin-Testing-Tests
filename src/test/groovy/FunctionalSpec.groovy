@@ -147,6 +147,15 @@ class FunctionalSpec extends BaseSpec {
         getOutput() isSuccessfulTestRun()
     }
 
+    def "test exec"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:exec', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
     def "test generate-all"() {
         given:
         workingDir = 'functional/test-application'
@@ -190,6 +199,123 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/grails-app/views/domainTestGenCtlr/show.gsp"
         when:
         executeMvn('grails:generate-views', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test set-version"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:set-version', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test test-app"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:test-app', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-clean"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:maven-clean', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-compile"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:maven-compile', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-config-directories"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:config-directories', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-functional-test"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:maven-functional-test', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-functional-test-with-grails-skip"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:maven-functional-test', "-DgrailsVersion=${grailsVersion}",  "-Dgrails.test.skip=true")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-functional-test-with-mvn-skip"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:maven-functional-test', "-DgrailsVersion=${grailsVersion}", "-Dmaven.test.skip=true")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-initialize-with-existing-project"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:init', "-DgrailsVersion=${grailsVersion}", "-Dproject.artifactId=test-application", "-Dproject.version=1.0-SNAPSHOT")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-test"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:maven-test', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-test-with-grails-skip"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:maven-test', "-DgrailsVersion=${grailsVersion}", "-Dgrails.test.skip=true")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-test-with-maven-skip"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:maven-test', "-DgrailsVersion=${grailsVersion}", "-Dmaven.test.skip=true")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test mvn-validate"() {
+        given:
+        workingDir = 'functional/test-application'
+        when:
+        executeMvn('grails:validate', "-DgrailsVersion=${grailsVersion}", "-Dproject.artifactId=test-application", "-Dproject.version=1.0-SNAPSHOT")
         then:
         getOutput() isSuccessfulTestRun()
     }
