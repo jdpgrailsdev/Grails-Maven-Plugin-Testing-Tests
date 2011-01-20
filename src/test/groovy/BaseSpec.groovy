@@ -186,21 +186,21 @@ abstract class BaseSpec extends Specification {
     /**
      * Verifies that Maven executed all required goals.
      * @return A {@code Matcher} that evaluates to {@code true} if the
-     * 	output contains the string '[INFO] BUILD SUCCESSFUL' or {@code false}
+     * 	output contains the string '[INFO] Total time' or {@code false}
      * 	if the output does not contain the aforementioned string.
      */
     def looksLikeTestsDidRun() {
-        matcher("should contain '[INFO] BUILD SUCCESSFUL'") { it.contains('[INFO] BUILD SUCCESSFUL') }
+        matcher("should contain '[INFO] Total time'") { it.contains('[INFO] Total time') }
     }
 
     /**
      * Verifies that Maven successfully ran all goals without error.
      * @return A {@code Matcher} that evaluates to {@code true} if the
-     * 	output does <b>NOT</b> contains the string '[ERROR] BUILD ERROR'
+     * 	output contains the string '[INFO] BUILD SUCCESSFUL'
      *  or {@code false} if the output does contain the aforementioned string.
      */
     def hasNoTestFailures() {
-        matcher("should not contain '[ERROR] BUILD ERROR'") { !(it.readLines().any { it ==~ ~/^[ERROR] BUILD ERROR.*$/ }) }
+        matcher("should contain '[INFO] BUILD SUCCESSFUL'") { it.contains('[INFO] BUILD SUCCESSFUL') }
     }
 
     /**

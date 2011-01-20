@@ -19,7 +19,7 @@ import spock.lang.*
  * Functional tests for Grails Maven Plugin goals.
  *
  * This spec is inspired by/derived from the functional spec
- * found in the Grails Testing Tests project (https://github.com/grails/grails-testing-tests.git)
+ * found in the Grails Testing Tests project (https://github.com/grails/grails-testing-tests)
  * See http://grails.org/doc/latest/guide/4.%20The%20Command%20Line.html#4.5%20Ant%20and%20Maven for
  * more information regarding the goals available in the Grails Maven plugin.
  *
@@ -199,6 +199,31 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/grails-app/views/domainTestGenCtlr/show.gsp"
         when:
         executeMvn('grails:generate-views', "-DgrailsVersion=${grailsVersion}")
+        then:
+        getOutput() isSuccessfulTestRun()
+    }
+
+    def "test install-templates"() {
+        given:
+        workingDir = 'functional/test-application'
+        artifacts << "${workingDir}/src/templates/artifacts/Controller.groovy"
+        artifacts << "${workingDir}/src/templates/artifacts/DomainClass.groovy"
+        artifacts << "${workingDir}/src/templates/artifacts/Filters.groovy"
+        artifacts << "${workingDir}/src/templates/artifacts/hibernate.cfg.xml"
+        artifacts << "${workingDir}/src/templates/artifacts/Script.groovy"
+        artifacts << "${workingDir}/src/templates/artifacts/Service.groovy"
+        artifacts << "${workingDir}/src/templates/artifacts/TagLib.groovy"
+        artifacts << "${workingDir}/src/templates/artifacts/Tests.groovy"
+        artifacts << "${workingDir}/src/templates/artifacts/WebTest.groovy"
+        artifacts << "${workingDir}/src/templates/scaffolding/Controller.groovy"
+        artifacts << "${workingDir}/src/templates/scaffolding/create.gsp"
+        artifacts << "${workingDir}/src/templates/scaffolding/edit.gsp"
+        artifacts << "${workingDir}/src/templates/scaffolding/list.gsp"
+        artifacts << "${workingDir}/src/templates/scaffolding/renderEditor.template"
+        artifacts << "${workingDir}/src/templates/scaffolding/show.gsp"
+        artifacts << "${workingDir}/src/templates/war/web.xml"
+        when:
+        executeMvn('grails:install-templates', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
