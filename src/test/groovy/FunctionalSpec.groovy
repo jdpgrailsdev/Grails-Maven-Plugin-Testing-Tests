@@ -43,7 +43,7 @@ class FunctionalSpec extends BaseSpec {
 //		 * needed in the next test. Plus, it's always good
 //		 * to clean up after yourself ;).
 //		 */
-//		executeMvn('clean', "-DgrailsVersion=${grailsVersion}")
+//		execute('clean', "-DgrailsVersion=${grailsVersion}")
         workingDir = ''
     }
 
@@ -52,14 +52,14 @@ class FunctionalSpec extends BaseSpec {
         workingDir = 'functional/create-pom'
         artifacts << "${workingDir}/pom.xml"
         when:
-        executeMvn("org.grails:grails-maven-plugin:${grailsVersion}:create-pom", '-DgroupId=com.mycompany')
+        execute(false, "org.grails:grails-maven-plugin:${grailsVersion}:create-pom", '-DgroupId=com.mycompany')
         then:
         getOutput() isSuccessfulTestRun()
     }
 
     //def "test create-pom without group id"() {
     //    when:
-    //    executeMvn('functional/create-pom', "org.grails:grails-maven-plugin:${grailsVersion}:create-pom")
+    //    execute('functional/create-pom', "org.grails:grails-maven-plugin:${grailsVersion}:create-pom")
     //    then:
     //    getOutput() isSuccessfulTestRun()
     //}
@@ -68,7 +68,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:clean', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:clean', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -79,7 +79,7 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/grails-app/controllers/com/mycompany/ControllerTestController.groovy"
         artifacts << "${workingDir}/test/unit/com/mycompany/ControllerTestControllerTests.groovy"
         when:
-        executeMvn('grails:create-controller', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:create-controller', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -90,7 +90,7 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/grails-app/domain/com/mycompany/DomainTest.groovy"
         artifacts << "${workingDir}/test/unit/com/mycompany/DomainTestTests.groovy"
         when:
-        executeMvn('grails:create-domain-class', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:create-domain-class', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -98,9 +98,10 @@ class FunctionalSpec extends BaseSpec {
     def "test create-integration-test"() {
         given:
         workingDir = 'functional/test-application'
+        checkForUpgrade(workingDir)
         artifacts << "${workingDir}/test/integration/com/mycompany/IntegrationTestTests.groovy"
         when:
-        executeMvn('grails:create-integration-test', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:create-integration-test', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -110,7 +111,7 @@ class FunctionalSpec extends BaseSpec {
         workingDir = 'functional/test-application'
         artifacts << "${workingDir}/scripts/TestScript.groovy"
         when:
-        executeMvn('grails:create-script', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:create-script', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -121,7 +122,7 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/grails-app/services/com/mycompany/ServiceTestService.groovy"
         artifacts << "${workingDir}/test/unit/com/mycompany/ServiceTestServiceTests.groovy"
         when:
-        executeMvn('grails:create-service', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:create-service', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -132,7 +133,7 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/grails-app/taglib/com/mycompany/TagLibTestTagLib.groovy"
         artifacts << "${workingDir}/test/unit/com/mycompany/TagLibTestTagLibTests.groovy"
         when:
-        executeMvn('grails:create-tag-lib', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:create-tag-lib', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -142,7 +143,7 @@ class FunctionalSpec extends BaseSpec {
         workingDir = 'functional/test-application'
         artifacts << "${workingDir}/test/unit/com/mycompany/UnitTestTestTests.groovy"
         when:
-        executeMvn('grails:create-unit-test', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:create-unit-test', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -151,7 +152,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:exec', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:exec', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -169,8 +170,8 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/test/unit/com/mycompany/DomainTestGenAllTests.groovy"
         artifacts << "${workingDir}/test/unit/com/mycompany/DomainTestGenAllControllerTests.groovy"
         when:
-        executeMvn('grails:create-domain-class', "-DgrailsVersion=${grailsVersion}")
-        executeMvn('grails:generate-all', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:create-domain-class', "-DgrailsVersion=${grailsVersion}")
+        execute('grails:generate-all', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -183,8 +184,8 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/grails-app/controllers/com/mycompany/DomainTestGenCtlrController.groovy"
         artifacts << "${workingDir}/test/unit/com/mycompany/DomainTestGenCtlrControllerTests.groovy"
         when:
-        executeMvn('grails:create-domain-class', "-DgrailsVersion=${grailsVersion}")
-        executeMvn('grails:generate-controller', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:create-domain-class', "-DgrailsVersion=${grailsVersion}")
+        execute('grails:generate-controller', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -198,7 +199,7 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/grails-app/views/domainTestGenCtlr/list.gsp"
         artifacts << "${workingDir}/grails-app/views/domainTestGenCtlr/show.gsp"
         when:
-        executeMvn('grails:generate-views', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:generate-views', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -223,7 +224,7 @@ class FunctionalSpec extends BaseSpec {
         artifacts << "${workingDir}/src/templates/scaffolding/show.gsp"
         artifacts << "${workingDir}/src/templates/war/web.xml"
         when:
-        executeMvn('grails:install-templates', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:install-templates', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -232,7 +233,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:set-version', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:set-version', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -241,7 +242,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:test-app', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:test-app', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -250,7 +251,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:maven-clean', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:maven-clean', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -259,7 +260,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:maven-compile', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:maven-compile', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -268,7 +269,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:config-directories', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:config-directories', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -277,7 +278,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:maven-functional-test', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:maven-functional-test', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -286,7 +287,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:maven-functional-test', "-DgrailsVersion=${grailsVersion}",  "-Dgrails.test.skip=true")
+        execute(true, 'grails:maven-functional-test', "-DgrailsVersion=${grailsVersion}",  "-Dgrails.test.skip=true")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -295,7 +296,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:maven-functional-test', "-DgrailsVersion=${grailsVersion}", "-Dmaven.test.skip=true")
+        execute(true, 'grails:maven-functional-test', "-DgrailsVersion=${grailsVersion}", "-Dmaven.test.skip=true")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -304,7 +305,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:init', "-DgrailsVersion=${grailsVersion}", "-Dproject.artifactId=test-application", "-Dproject.version=1.0-SNAPSHOT")
+        execute(true, 'grails:init', "-DgrailsVersion=${grailsVersion}", "-Dproject.artifactId=test-application", "-Dproject.version=1.0-SNAPSHOT")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -313,7 +314,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:maven-test', "-DgrailsVersion=${grailsVersion}")
+        execute(true, 'grails:maven-test', "-DgrailsVersion=${grailsVersion}")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -322,7 +323,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:maven-test', "-DgrailsVersion=${grailsVersion}", "-Dgrails.test.skip=true")
+        execute(true, 'grails:maven-test', "-DgrailsVersion=${grailsVersion}", "-Dgrails.test.skip=true")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -331,7 +332,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:maven-test', "-DgrailsVersion=${grailsVersion}", "-Dmaven.test.skip=true")
+        execute(true, 'grails:maven-test', "-DgrailsVersion=${grailsVersion}", "-Dmaven.test.skip=true")
         then:
         getOutput() isSuccessfulTestRun()
     }
@@ -340,7 +341,7 @@ class FunctionalSpec extends BaseSpec {
         given:
         workingDir = 'functional/test-application'
         when:
-        executeMvn('grails:validate', "-DgrailsVersion=${grailsVersion}", "-Dproject.artifactId=test-application", "-Dproject.version=1.0-SNAPSHOT")
+        execute(true, 'grails:validate', "-DgrailsVersion=${grailsVersion}", "-Dproject.artifactId=test-application", "-Dproject.version=1.0-SNAPSHOT")
         then:
         getOutput() isSuccessfulTestRun()
     }

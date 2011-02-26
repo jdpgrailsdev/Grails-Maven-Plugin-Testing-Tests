@@ -72,39 +72,13 @@ abstract class BaseSpec extends Specification {
      * @param command The Maven goal(s) to be executed.
      * @return A {@code ProcessBuilder} object that can be executed.
      */
-    def createMvnProcess(String workingDir, CharSequence[] command) {
+    def createProcess(String workingDir, CharSequence[] command) {
         def completeCommand = [createCommand(mvnHome, 'mvn')]
         completeCommand.addAll(command.toList()*.toString())
-        _createProcess(new File(projectWorkDir, workingDir), completeCommand as String[], "MAVEN_HOME", mvnHome)
-    }
-
-    /**
-     * Creates the command/process to execute Grails.
-     * @param projectDir The directory to execute the Grails
-     * 	command line from.
-     * @param command The Grails command to be executed.
-     * @return A {@code ProcessBuilder} object that can be executed.
-     */
-    def createGrailsProcess(String projectDir, CharSequence[] command) {
-        def completeCommand = [createCommand(grailsHome, 'grails')]
-        completeCommand.addAll(command.toList()*.toString())
-        _createProcess(new File(projectWorkDir, projectDir), completeCommand as String[], "GRAILS_HOME", grailsHome)
-    }
-
-    /**
-     * Creates a {@code ProcessBuilder} object that can be used to run
-     * the complete command in the supplied directory.
-     * @param dir The directory where the command will be executed.
-     * @param completeCommand The command to execute.
-     * @param environmentVar The name of the environment variable.
-     * @param environmentVarValue The value of the environment variable.
-     * @return A {@code ProcessBuilder} object that wraps the command.
-     */
-    def _createProcess(File dir, String[] completeCommand, String environmentVar, String environmentVarValue) {
-        new ProcessBuilder(completeCommand).with {
+        new ProcessBuilder(completeCommand as String[]).with {
             redirectErrorStream(true)
-            directory(dir)
-            environment()[environmentVar] = environmentVarValue
+            directory(new File(projectWorkDir, workingDir))
+            environment()["MAVEN_HOME"] = mvnHome
             start()
         }
     }
@@ -114,62 +88,27 @@ abstract class BaseSpec extends Specification {
      * @param command The Maven goal(s) to execute.
      * @return The exit status of running the Maven command.
      */
-    def executeMvn(CharSequence[] command) {
-        checkForUpgrade(workingDir)
-        _execute(createMvnProcess(workingDir, *command), createCommandName(command))
-
-    }
-
-    /**
-     * Executes Grails.
-     * @param projectDir The project directory to run the Grails command from.
-     * @param command The Grails command to execute.
-     * @return The exit status of running the Grails command.
-     */
-    def executeGrails(String projectDir, CharSequence[] command) {
-        _execute(createGrailsProcess(projectDir, *command), createCommandName(command))
-    }
-
-    /**
-     * Executes the process.
-     * @param process A {@code Process} implementation.
-     * @param commandName The name of the command (used for naming the log file that contains
-     * 	the output of the execution).
-     * @return The exit status of the process.
-     */
-    def _execute(Process process, String commandName) {
+    def execute(boolean upgrade = false, CharSequence[] command) {
+        if(upgrade) {
+            checkForUpgrade(workingDir)
+        }
         def outputBuffer = new StringBuffer()
+        def process = createProcess(workingDir, *command)
         process.consumeProcessOutputStream(outputBuffer)
         process.waitForOrKill(PROCESS_TIMEOUT_MILLS)
         exitStatus = process.exitValue()
         output = outputBuffer.toString()
-        dumpOutput(commandName)
+        dumpOutput(command?.join('_').replace('/','_').replace(':','_').replace(' ','_').replace('\\','_').replaceAll("\\.\\.","_"))
         exitStatus
     }
 
     /**
-     * Creates an unique name for a command by joining all
-     * tokens in the command with underscores (_) and replacing
-     * all forward-slashes (/), colons (:) and spaces ( ) with
-     * underscores (_).
-     * @param command The command to be executed.
-     * @return A unique name for the command.
-     */
-    def createCommandName(CharSequence[] command) {
-        command?.join('_').replace('/','_').replace(':','_').replace(' ','_')
-    }
-
-    /**
-     * Saves the output of the process execution to a .txt file for
-     * verifcation.
+     * Saves the output of the process execution to a .txt file for verification.
      * @param commandName The name of the command.
      */
     private dumpOutput(String commandName) {
-        println commandName
         def outputLabel = "${this.class.simpleName}-${testName.methodName}-${dumpCounter++}-${commandName}"
         new File(outputDir, "${outputLabel}.txt") << output
-        println outputLabel
-        println output
     }
 
     /**
@@ -180,7 +119,7 @@ abstract class BaseSpec extends Specification {
      * 	conditions are met or {@code false} if the conditions are not met.
      */
     def isSuccessfulTestRun() {
-        allOf(looksLikeTestsDidRun(), hasNoTestFailures(), verifyArtifacts())
+        allOf(verifyMavenExecuted(), hasNoTestFailures(), verifyArtifacts())
     }
 
     /**
@@ -189,7 +128,7 @@ abstract class BaseSpec extends Specification {
      * 	output contains the string '[INFO] Total time' or {@code false}
      * 	if the output does not contain the aforementioned string.
      */
-    def looksLikeTestsDidRun() {
+    def verifyMavenExecuted() {
         matcher("should contain '[INFO] Total time'") { it.contains('[INFO] Total time') }
     }
 
@@ -259,7 +198,7 @@ abstract class BaseSpec extends Specification {
      * 	current operating system.
      */
     def createCommand(String pathHome, String binaryName) {
-        "${pathHome}${File.separator}bin${File.separator}${binaryName}${isWindows() ? '.bat' : '.sh'}"
+        "${pathHome}${File.separator}bin${File.separator}${binaryName}${isWindows() ? '.bat' : ''}"
     }
 
     /**
@@ -278,7 +217,7 @@ abstract class BaseSpec extends Specification {
         }
 
         if(projectVersion != grailsVersion) {
-            upgradeProject(projectDir)
+            upgradeProject()
         }
     }
 
@@ -286,11 +225,10 @@ abstract class BaseSpec extends Specification {
      * Upgrades the Grails project found at the supplied
      * project directory to match the Grails version of the
      * installation pointed to by the grails.home system property.
-     * @param projectDir The directory path of a Grails project.
      */
-    def upgradeProject(String projectDir) {
-        assert executeGrails(projectDir, 'upgrade', '--non-interactive') == 0
-        assert output.contains('Project upgraded')
+    def upgradeProject() {
+        CharSequence[] upgradeCommand = ["org.grails:grails-maven-plugin:${grailsVersion}:upgrade", "-DgrailsHome=${grailsHome}", "-DnonInteractive=true", "-DgrailsVersion=${grailsVersion}"]
+        assert (execute(false, *upgradeCommand) == 0)
     }
 
     /**
@@ -324,6 +262,7 @@ abstract class BaseSpec extends Specification {
      * 	all supplied matchers evaluate to {@code true} or evaluates
      * 	to {@code false} if all supplied matchers evaluate to {@code false}.
      */
+    @SuppressWarnings("rawtypes")
     private Matcher allOf(Matcher[] all) {
         Matchers.allOf(all)
     }

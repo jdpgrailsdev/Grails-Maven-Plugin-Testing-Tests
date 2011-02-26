@@ -16,4 +16,11 @@ EXECUTION
 
 To run the tests from the command line, navigate to the project and run the following command:
 
-gradlew clean test -Dmvn.home=path/to/maven/installation -Dgrails.home=path/to/grails/installation
+gradle clean test -Dmvn.home=path/to/maven/installation
+
+If you would like to use a specific Grails installation, add the following to the list of arguments passed to Gradle:
+
+-Dgrails.home=path/to/grails/installation
+
+By default, the testing framework will assuming a checkout of the grails-core project that is a peer to the testing
+framework (i.e. ..\grails-core) if no grails.home argument is provided.

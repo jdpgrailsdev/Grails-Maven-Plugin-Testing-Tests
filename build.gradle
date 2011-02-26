@@ -1,8 +1,9 @@
-/*apply plugin: "groovy"*/
-usePlugin 'groovy'
+apply plugin:'groovy'
+apply plugin:'eclipse'
 
 repositories {
   mavenCentral()
+  mavenRepo urls: "http://m2repo.spockframework.org/releases/"
   mavenRepo urls: "http://m2repo.spockframework.org/snapshots"
   mavenRepo urls: "http://m2repo.spockframework.org/ext/"
 }
@@ -32,12 +33,12 @@ test.doFirst {
         into projectWorkDir
      }
 
-    test.options.systemProperties['buildDir'] = buildDir.canonicalPath
-    test.options.systemProperties['testClassesDir'] = sourceSets.test.classesDir.canonicalPath
-    test.options.systemProperties['grailsHome'] = System.properties['grails.home'] ?: new File('../grails-core').absolutePath
-    test.options.systemProperties['mvnHome'] = System.properties['mvn.home']
-    test.options.systemProperties['projectWorkDir'] = projectWorkDir.canonicalPath
-    test.options.systemProperties['outputDir'] = outputDir.canonicalPath
+    test.systemProperties = [buildDir: buildDir.canonicalPath,
+        testClassesDir: sourceSets.test.classesDir.canonicalPath,
+        grailsHome: System.properties['grails.home'] ?: new File('../grails-core').absolutePath,
+        mvnHome: System.properties['mvn.home'],
+        projectWorkDir: projectWorkDir.canonicalPath,
+        outputDir: outputDir.canonicalPath]
 
     if (project.hasProperty('tp')) {
         test.include "**/${tp}Spec.*"

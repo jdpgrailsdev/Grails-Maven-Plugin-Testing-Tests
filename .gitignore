@@ -1,6 +1,7 @@
-.settings
-bing
+bin
 build
 gradle
+.settings
+.gradle
 .classpath
 .project
